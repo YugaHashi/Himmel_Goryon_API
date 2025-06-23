@@ -1,13 +1,10 @@
-// client.js
 async function sendMessage() {
   const btn        = document.getElementById('sendBtn');
   const resBox     = document.getElementById('responseBox');
   const companion  = document.getElementById('companion').value;
   const preference = document.getElementById('preference').value;
   const mood       = document.getElementById('mood').value;
-  const freeInput  = document.getElementById('freeInput').value.trim();
 
-  // バリデーション
   if (!companion || !preference || !mood) {
     resBox.innerText = '⚠️ 全て選択してください';
     return;
@@ -25,22 +22,20 @@ async function sendMessage() {
         companion,
         preference,
         mood,
-        freeInput,
         facility: '南平台ごりょんさん'
       })
     });
     const { reply } = await resp.json();
 
-    // 改行＋空行を確実に入れる
     resBox.innerHTML = `
-<p>🍽 <strong>おすすめメニュー</strong></p>
-<p>${reply.recommend}</p>
+<p>🍽 <strong>おすすめメニュー</strong></p><br>
+<p>${reply.recommend}</p><br>
 
-<p>📝 <strong>おすすめ理由</strong></p>
-<p>${reply.story}</p>
+<p>📝 <strong>おすすめ理由</strong></p><br>
+<p>${reply.story}</p><br>
 
-<p>🍶 <strong>相性のペアリング</strong></p>
-<p>${reply.pairing}</p>
+<p>🍶 <strong>相性のペアリング</strong></p><br>
+<p>${reply.pairing}</p><br>
     `;
   } catch (e) {
     console.error(e);
