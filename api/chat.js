@@ -1,30 +1,35 @@
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 
+export const config = { runtime: 'edge' };
+
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY
 );
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-export default async function handler(req, res) {
-  // CORS対応ここから
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
+export default async function handler(req) {
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    return new Response(null, { status: 200, headers: corsHeaders() });
   }
+
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: corsHeaders()
+    });
   }
 
-  const { companion, preference, mood, freeInput, facility } = req.body;
+  const { companion, preference, mood, facility } = await req.json();
   if (!companion || !preference || !mood || !facility) {
-    return res.status(400).json({ error: 'Invalid input' });
+    return new Response(JSON.stringify({ error: 'Invalid input' }), {
+      status: 400,
+      headers: corsHeaders()
+    });
   }
 
+  // Supabase からメニュー情報を取得
   const { data: menuItems } = await supabase
     .from('menu_items')
     .select('name,description,pairing');
@@ -36,10 +41,9 @@ export default async function handler(req, res) {
 【同行者】${companion}
 【好み】${preference}
 【気分】${mood}
-【補足】${freeInput || 'なし'}
 
 【メニュー一覧】
-${menuItems.map(i => `・${i.name}：${i.description}`).join('\n')}
+${menuItems.map(i=>`・${i.name}：${i.description}`).join('\n')}
 
 {"recommend":"","story":"","pairing":""}
 `;
@@ -48,20 +52,34 @@ ${menuItems.map(i => `・${i.name}：${i.description}`).join('\n')}
     const chat = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [{ role: 'system', content: prompt }],
-      temperature: 0.3,
-      max_tokens: 200
+      temperature: 0.3, max_tokens: 200
     });
 
     const reply = JSON.parse(chat.choices[0].message.content);
 
     await supabase.from('chat_logs').insert([{
       facility_name: facility,
-      companion, preference, mood, freeInput, gpt_response: reply
+      companion, preference, mood,
+      gpt_response: reply
     }]);
 
-    return res.status(200).json({ reply });
+    return new Response(JSON.stringify({ reply }), {
+      status: 200,
+      headers: corsHeaders()
+    });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: 'Server error' });
+    return new Response(JSON.stringify({ error: 'Server error' }), {
+      status: 500,
+      headers: corsHeaders()
+    });
   }
+}
+
+function corsHeaders() {
+  return {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type'
+  };
 }
