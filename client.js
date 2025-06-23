@@ -1,4 +1,3 @@
-// client.js
 async function sendMessage() {
   const btn        = document.getElementById('sendBtn');
   const resBox     = document.getElementById('responseBox');
@@ -31,14 +30,9 @@ async function sendMessage() {
     const { reply } = await resp.json();
 
     resBox.innerHTML = `
-<p>🍽 <strong>おすすめメニュー</strong></p><br>
-<p>${reply.recommend}</p><br>
-
-<p>📝 <strong>おすすめ理由</strong></p><br>
-<p>${reply.story}</p><br>
-
-<p>🍶 <strong>相性のペアリング</strong></p><br>
-<p>${reply.pairing}</p><br>
+<p>🍽 <strong>おすすめメニュー</strong><br>${reply.recommend}</p><br>
+<p>📝 <strong>おすすめ理由</strong><br>${reply.story}</p><br>
+<p>🍶 <strong>相性のペアリング</strong><br>${reply.pairing}</p><br>
     `;
   } catch (e) {
     console.error(e);
