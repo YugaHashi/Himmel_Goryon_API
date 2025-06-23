@@ -9,6 +9,7 @@ const supabase = createClient(
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export default async function handler(req, res) {
+  // CORS プリフライト対応
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin','*');
     res.setHeader('Access-Control-Allow-Methods','POST,OPTIONS');
@@ -29,10 +30,10 @@ export default async function handler(req, res) {
     .from('menu_items')
     .select('name,description,pairing');
 
-  // GPT プロンプト
+  // プロンプト生成
   const prompt = `
 あなたは「${facility}」のAI接客スタッフです。
-以下内容をもとに、各30〜50字でJSON出力してください。
+以下の情報をもとに、それぞれ30〜50字程度でJSON出力してください。
 
 【同行者】${companion}
 【好み】${preference}
@@ -49,11 +50,12 @@ ${menuItems.map(i=>`・${i.name}：${i.description}`).join('\n')}
     const chat = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [{ role:'system', content: prompt }],
-      temperature: 0.3, max_tokens: 200
+      temperature: 0.3,
+      max_tokens: 200
     });
     const reply = JSON.parse(chat.choices[0].message.content);
 
-    // ログ保存
+    // チャットログ保存
     await supabase.from('chat_logs').insert([{
       facility_name: facility,
       companion, preference, mood, freeInput,
