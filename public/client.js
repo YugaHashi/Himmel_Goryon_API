@@ -4,6 +4,7 @@ async function sendMessage() {
   const companion  = document.getElementById('companion').value;
   const preference = document.getElementById('preference').value;
   const mood       = document.getElementById('mood').value;
+  const freeInput  = document.getElementById('freeInput').value.trim() || '';
 
   if (!companion || !preference || !mood) {
     resBox.innerText = '⚠️ 全て選択してください';
@@ -22,10 +23,17 @@ async function sendMessage() {
         companion,
         preference,
         mood,
+        freeInput,
         facility: '南平台ごりょんさん'
       })
     });
-    const { reply } = await resp.json();
+    const data = await resp.json();
+
+    if (!data.reply) {
+      throw new Error("No reply returned");
+    }
+
+    const reply = data.reply;
 
     resBox.innerHTML = `
 <p>🍽 <strong>おすすめメニュー</strong></p><br>
@@ -45,3 +53,5 @@ async function sendMessage() {
     btn.innerText = '▶ 提案を聞く';
   }
 }
+
+document.getElementById('sendBtn').addEventListener('click', sendMessage);
