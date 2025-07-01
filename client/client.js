@@ -6,8 +6,17 @@ function getTodayKey() {
 function updateUsageInfo() {
   const key = getTodayKey();
   const usage = parseInt(localStorage.getItem(key) || '0', 10);
+  const remaining = Math.max(0, 3 - usage);
+
   const usageInfo = document.getElementById('usageInfo');
-  usageInfo.innerText = `🍶 本日のご提案利用回数：${usage} / 3`;
+  usageInfo.innerText = `🍶 残り利用回数：${remaining} / 3`;
+
+  if (remaining === 0) {
+    usageInfo.style.color = '#a94442';
+    usageInfo.style.background = '#f2dede';
+    usageInfo.style.borderLeft = '6px solid #d9534f';
+    usageInfo.innerText += '\n⚠️ 本日の提案は上限に達しています。';
+  }
 }
 
 async function sendMessage() {
@@ -23,6 +32,7 @@ async function sendMessage() {
 
   if (usage >= 3) {
     resBox.innerText = '⚠️ 本日のご提案は3回までとなっております。';
+    updateUsageInfo();
     return;
   }
 
@@ -74,5 +84,6 @@ async function sendMessage() {
   }
 }
 
-document.getElementById('sendBtn').addEventListener('click', sendMessage);
+// 初回読み込みで回数表示
 window.addEventListener('DOMContentLoaded', updateUsageInfo);
+document.getElementById('sendBtn').addEventListener('click', sendMessage);
