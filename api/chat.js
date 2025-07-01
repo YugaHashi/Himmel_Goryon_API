@@ -35,7 +35,7 @@ export default async function handler(req, res) {
   }
 
   // GPT プロンプト
-  const prompt = `
+  const prompt = 
 あなたは「${facility}」のAI接客スタッフです。
 以下内容をもとに、出力には純粋なJSONのみを返してください。マークダウンやコードフェンスは不要です。
 
@@ -45,10 +45,10 @@ export default async function handler(req, res) {
 【補足】${freeInput || 'なし'}
 
 【メニュー一覧】
-${menuItems.map(i => `・${i.name}：${i.description}`).join('\n')}
+${menuItems.map(i => ・${i.name}：${i.description}).join('\n')}
 
 {"recommend":"","story":"","pairing":""}
-`;
+;
 
   try {
     const chat = await openai.chat.completions.create({
@@ -58,12 +58,17 @@ ${menuItems.map(i => `・${i.name}：${i.description}`).join('\n')}
       max_tokens: 200
     });
 
-    // 返ってきたテキストから ``` や ```json を剥がして純粋なJSON文字列に
+    // 返ってきたテキストから 
+や
+json を剥がして純粋なJSON文字列に
     let content = chat.choices[0].message.content.trim();
     content = content
-      .replace(/^```json\s*/, '')
-      .replace(/^```/, '')
-      .replace(/```$/, '')
+      .replace(/^
+json\s*/, '')
+      .replace(/^
+/, '')
+      .replace(/
+$/, '')
       .trim();
 
     const reply = JSON.parse(content);
@@ -84,4 +89,4 @@ ${menuItems.map(i => `・${i.name}：${i.description}`).join('\n')}
     console.error('Handler error:', err);
     return res.status(500).json({ error: 'Server error' });
   }
-}
+}　　
