@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      background: transparent;
+      margin: 0;
+      padding: 0;
+    }
+    #usageInfo {
+      color: white;
+      font-weight: bold;
+      margin: 12px 0;
+    }
+    select, textarea, button {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+    #sendBtn {
+      background-color: #ff7f50;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      border: none;
+      border-radius: 12px;
+    }
+    #responseBox {
+      margin-top: 20px;
+      background: #fff;
+      padding: 15px;
+      border-left: 5px solid #7b5b44;
+      border-radius: 10px;
+      min-height: 100px;
+      color: #333;
+      font-size: 15px;
+    }
+    .container {
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="usageInfo">🍶 残り利用回数を読み込み中...</div>
+
+    <select id="companion">
+      <option disabled selected>誰と来店？</option>
+      <option>一人</option>
+      <option>カップル</option>
+      <option>家族</option>
+    </select>
+
+    <select id="preference">
+      <option disabled selected>どんな好み？</option>
+      <option>名物が食べたい</option>
+      <option>さっぱり系が好き</option>
+      <option>ガッツリ食べたい</option>
+    </select>
+
+    <select id="mood">
+      <option disabled selected>気分は？</option>
+      <option>お祝い気分</option>
+      <option>ゆったり過ごしたい</option>
+      <option>お酒と楽しみたい</option>
+    </select>
+
+    <textarea id="freeInput" placeholder="補足があればご記入ください"></textarea>
+
+    <button id="sendBtn">▶ 提案を聞く</button>
+
+    <div id="responseBox">（ここに提案が表示されます）</div>
+  </div>
+
+  <script src="https://himmel-api.vercel.app/client.js"></script>
+</body>
+</html>
