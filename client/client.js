@@ -1,3 +1,15 @@
+function getTodayKey() {
+  const today = new Date().toISOString().split('T')[0]; // "YYYY-MM-DD"
+  return `goryon-usage-${today}`;
+}
+
+function updateUsageInfo() {
+  const key = getTodayKey();
+  const usage = parseInt(localStorage.getItem(key) || '0', 10);
+  const usageInfo = document.getElementById('usageInfo');
+  usageInfo.innerText = `🍶 本日のご提案利用回数：${usage} / 3`;
+}
+
 async function sendMessage() {
   const btn        = document.getElementById('sendBtn');
   const resBox     = document.getElementById('responseBox');
@@ -5,6 +17,14 @@ async function sendMessage() {
   const preference = document.getElementById('preference').value;
   const mood       = document.getElementById('mood').value;
   const freeInput  = document.getElementById('freeInput').value.trim() || '';
+
+  const key = getTodayKey();
+  const usage = parseInt(localStorage.getItem(key) || '0', 10);
+
+  if (usage >= 3) {
+    resBox.innerText = '⚠️ 本日のご提案は3回までとなっております。';
+    return;
+  }
 
   if (!companion || !preference || !mood) {
     resBox.innerText = '⚠️ 全て選択してください';
@@ -27,14 +47,11 @@ async function sendMessage() {
         facility: '南平台ごりょんさん'
       })
     });
-    const data = await resp.json();
 
-    if (!data.reply) {
-      throw new Error("No reply returned");
-    }
+    const data = await resp.json();
+    if (!data.reply) throw new Error("No reply returned");
 
     const reply = data.reply;
-
     resBox.innerHTML = `
 <p>🍽 <strong>おすすめメニュー</strong></p><br>
 <p>${reply.recommend}</p><br>
@@ -45,6 +62,9 @@ async function sendMessage() {
 <p>🍶 <strong>相性のペアリング</strong></p><br>
 <p>${reply.pairing}</p><br>
     `;
+
+    localStorage.setItem(key, usage + 1);
+    updateUsageInfo();
   } catch (e) {
     console.error(e);
     resBox.innerText = '❌ エラーが発生しました';
@@ -55,3 +75,4 @@ async function sendMessage() {
 }
 
 document.getElementById('sendBtn').addEventListener('click', sendMessage);
+window.addEventListener('DOMContentLoaded', updateUsageInfo);
