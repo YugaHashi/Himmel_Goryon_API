@@ -1,6 +1,17 @@
+// clients.js
 async function sendMessage() {
-  const btn        = document.getElementById('sendBtn');
-  const resBox     = document.getElementById('responseBox');
+  const btn    = document.getElementById('sendBtn');
+  const resBox = document.getElementById('responseBox');
+
+  // ローカル日付と使用回数チェック（１日３回まで）
+  const localDate = new Date().toISOString().slice(0, 10);
+  const usageKey  = `usage_${localDate}`;
+  let count = parseInt(localStorage.getItem(usageKey) || '0');
+  if (count >= 3) {
+    resBox.innerText = '⚠️ 本日の提案は上限の3回に達しました';
+    return;
+  }
+
   const companion  = document.getElementById('companion').value;
   const preference = document.getElementById('preference').value;
   const mood       = document.getElementById('mood').value;
@@ -11,12 +22,12 @@ async function sendMessage() {
     return;
   }
 
-  btn.disabled     = true;
-  btn.innerText    = '🍶 考え中…';
+  btn.disabled  = true;
+  btn.innerText = '🍶 考え中…';
   resBox.innerText = '🍶 ご提案を考え中です…';
 
   try {
-    const resp = await fetch('https://himmel-api.vercel.app/api/chat', {
+    const resp = await fetch('https://yugahashi.github.io/Himmel_Goryon_API/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -28,23 +39,21 @@ async function sendMessage() {
       })
     });
     const data = await resp.json();
+    if (!data.reply) throw new Error("No reply returned");
 
-    if (!data.reply) {
-      throw new Error("No reply returned");
-    }
+    // 使用回数をインクリメント
+    count += 1;
+    localStorage.setItem(usageKey, count);
 
     const reply = data.reply;
-
-    resBox.innerHTML = 
+    resBox.innerHTML = `
 <p>🍽 <strong>おすすめメニュー</strong></p><br>
 <p>${reply.recommend}</p><br>
-
 <p>📝 <strong>おすすめ理由</strong></p><br>
 <p>${reply.story}</p><br>
-
 <p>🍶 <strong>相性のペアリング</strong></p><br>
 <p>${reply.pairing}</p><br>
-    ;
+`;
   } catch (e) {
     console.error(e);
     resBox.innerText = '❌ エラーが発生しました';
