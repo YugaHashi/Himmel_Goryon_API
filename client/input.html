@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    select, textarea {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    #usageNotice {
+      font-size: 14px;
+      color: #444;
+      margin-bottom: 10px;
+    }
+    #message {
+      color: red;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="message"></div>
+<div id="usageNotice"></div>
+
+<select id="companion">
+  <option disabled selected>誰と？</option>
+  <option>一人</option>
+  <option>カップル</option>
+  <option>家族</option>
+</select>
+
+<select id="preference">
+  <option disabled selected>どんな好み？</option>
+  <option>名物が食べたい</option>
+  <option>さっぱり系が好き</option>
+  <option>ガッツリ食べたい</option>
+</select>
+
+<select id="mood">
+  <option disabled selected>気分は？</option>
+  <option>お祝い気分</option>
+  <option>ゆっくりしたい</option>
+  <option>お酒と楽しみたい</option>
+</select>
+
+<textarea id="freeInput" rows="2" placeholder="補足あれば"></textarea>
+
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlDate = urlParams.get('date');
+  const localDate = new Date().toISOString().slice(0, 10);
+  const usageNotice = document.getElementById('usageNotice');
+  const messageBox = document.getElementById('message');
+
+  if (!urlDate || urlDate !== localDate) {
+    messageBox.textContent = "このURLの有効期限は切れています。店舗のQRコードを読み取り直してください。";
+  } else {
+    const usageKey = `usage_${urlDate}`;
+    const count = parseInt(localStorage.getItem(usageKey)) || 0;
+    usageNotice.textContent = `利用回数：残り${Math.max(0, 3 - count)}回`;
+  }
+</script>
+
+</body>
+</html>
