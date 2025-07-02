@@ -1,0 +1,7 @@
+# APIキーなどを含む秘密ファイル
+.env
+.env.local
+
+# Node.js関連
+node_modules/
+dist/
