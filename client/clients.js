@@ -27,7 +27,7 @@ async function sendMessage() {
   resBox.innerText = '🍶 ご提案を考え中です…';
 
   try {
-    const resp = await fetch('https://yugahashi.github.io/Himmel_Goryon_API/api/chat', {
+    const resp = await fetch('https://himmel-api.vercel.app/api/chat', {  // 🔁 修正箇所
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
