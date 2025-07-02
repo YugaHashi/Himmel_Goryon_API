@@ -51,16 +51,16 @@
 
 <script>
   const urlParams = new URLSearchParams(window.location.search);
-  const urlDate = urlParams.get('date');
-  const localDate = new Date().toISOString().slice(0, 10);
+  const urlDate    = urlParams.get('date');
+  const localDate  = new Date().toISOString().slice(0, 10);
+  const usageKey   = `usage_${localDate}`;
+  const count      = parseInt(localStorage.getItem(usageKey)) || 0;
   const usageNotice = document.getElementById('usageNotice');
-  const messageBox = document.getElementById('message');
+  const messageBox  = document.getElementById('message');
 
   if (!urlDate || urlDate !== localDate) {
     messageBox.textContent = "このURLの有効期限は切れています。店舗のQRコードを読み取り直してください。";
   } else {
-    const usageKey = `usage_${urlDate}`;
-    const count = parseInt(localStorage.getItem(usageKey)) || 0;
     usageNotice.textContent = `利用回数：残り${Math.max(0, 3 - count)}回`;
   }
 </script>
