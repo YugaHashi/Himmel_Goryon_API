@@ -14,10 +14,17 @@
   </div>
 
   <script>
-    // ページ読み込み時は初期化後、直前の結果だけを表示
-    const last = localStorage.getItem('goryon_lastResult') || ''
-    if (last) {
-      document.getElementById('responseBox').innerHTML = last
+    const today    = new Date().toISOString().slice(0,10);
+    const usageKey = `usage_${today}`;
+    const used     = parseInt(localStorage.getItem(usageKey) || '0', 10);
+    const last     = localStorage.getItem('goryon_lastResult') || '';
+
+    if (used > 0 && last) {
+      // １回以上送信済み かつ 結果あり
+      document.getElementById('responseBox').innerHTML = last;
+    } else {
+      // 初回はクリアしておく
+      localStorage.removeItem('goryon_lastResult');
     }
   </script>
 </body>
