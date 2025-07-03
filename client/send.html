@@ -5,6 +5,22 @@
 </head>
 <body>
 
+<!-- 非表示で値を持たせる（input.htmlの値と同期するならJavaScript連携が必要） -->
+<select id="companion" style="display:none;">
+  <option selected>カップル</option>
+</select>
+
+<select id="preference" style="display:none;">
+  <option selected>名物が食べたい</option>
+</select>
+
+<select id="mood" style="display:none;">
+  <option selected>ゆっくりしたい</option>
+</select>
+
+<textarea id="freeInput" style="display:none;">カンパチ</textarea>
+
+<!-- 送信ボタン -->
 <button id="sendBtn"
         style="display:block;width:100%;margin:10px auto;
                padding:14px;background:#ff7f50;color:#fff;
