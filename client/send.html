@@ -1,41 +1,34 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
 </head>
 <body>
+  <!-- Carrd上の input.html と同じIDを持たせる必要があります -->
+  <script>
+    // input.html 側で選んだ値を親ページから取得し、
+    // この iframe 内 の同ID要素にコピーするスクリプトを入れるか、
+    // Carrd の Embed 設定で <iframe src="...send.html?companion=...&preference=...&mood=..."> のように
+    // URL パラメータで渡してください。
+  </script>
 
-<!-- 非表示で値を持たせる（input.htmlの値と同期するならJavaScript連携が必要） -->
-<select id="companion" style="display:none;">
-  <option selected>カップル</option>
-</select>
+  <!-- 送信ボタン -->
+  <button id="sendBtn"
+          style="display:block;width:100%;margin:10px auto;
+                 padding:14px;background:#ff7f50;color:#fff;
+                 border:none;border-radius:12px;font-weight:bold;
+                 font-size:16px;">
+    ▶ 提案を聞く
+  </button>
 
-<select id="preference" style="display:none;">
-  <option selected>名物が食べたい</option>
-</select>
+  <!-- 結果表示エリア（即時フィードバック用） -->
+  <div id="responseBox"
+       style="margin-top:16px;padding:12px;
+              background:#f3f3f3;border-radius:8px;
+              line-height:1.6;min-height:100px;">
+    （ここに提案が表示されます）
+  </div>
 
-<select id="mood" style="display:none;">
-  <option selected>ゆっくりしたい</option>
-</select>
-
-<textarea id="freeInput" style="display:none;">カンパチ</textarea>
-
-<!-- 送信ボタン -->
-<button id="sendBtn"
-        style="display:block;width:100%;margin:10px auto;
-               padding:14px;background:#ff7f50;color:#fff;
-               border:none;border-radius:12px;font-weight:bold;
-               font-size:16px;">
-  ▶ 提案を聞く
-</button>
-
-<!-- 応答結果を表示するエリア -->
-<div id="responseBox"
-     style="margin-top: 16px; padding: 12px; font-size: 14px;
-            background: #f3f3f3; border-radius: 8px; line-height: 1.6;">
-</div>
-
-<!-- クライアントスクリプトの読み込み -->
-<script src="https://yugahashi.github.io/Himmel_Goryon_API/client/clients.js"></script>
+  <script src="https://yugahashi.github.io/Himmel_Goryon_API/client/clients.js"></script>
 </body>
 </html>
