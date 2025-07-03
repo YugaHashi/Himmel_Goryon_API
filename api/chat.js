@@ -1,4 +1,4 @@
-// api/chat.js  
+// api/chat.js
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 
@@ -25,9 +25,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid input' });
   }
 
-  // ✅ スキーマ名を明記
+  // ✅ schema("recommendation") を追加して正しくスキーマを指定
   const { data: menuItems, error: sbError } = await supabase
-    .from('recommendation.menu_items')
+    .schema('recommendation')
+    .from('menu_items')
     .select('name,description,pairing');
 
   if (sbError) {
@@ -64,15 +65,18 @@ ${menuItems.map(i => `・${i.name}：${i.description}`).join('\n')}
     const reply = chat.choices[0].message.function_call?.arguments || chat.choices[0].message.content;
     const parsed = typeof reply === 'string' ? JSON.parse(reply) : reply;
 
-    // ✅ スキーマ名を明記
-    await supabase.from('recommendation.chat_logs').insert([{
-      facility_name: facility,
-      companion,
-      preference,
-      mood,
-      freeInput,
-      gpt_response: parsed
-    }]);
+    // ✅ chat_logs のスキーマも同様に schema() 指定
+    await supabase
+      .schema('recommendation')
+      .from('chat_logs')
+      .insert([{
+        facility_name: facility,
+        companion,
+        preference,
+        mood,
+        freeInput,
+        gpt_response: parsed
+      }]);
 
     res.setHeader('Access-Control-Allow-Origin', '*');
     return res.status(200).json({ reply: parsed });
