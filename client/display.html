@@ -12,5 +12,15 @@
               min-height:100px;white-space:pre-wrap;">
     （ここに提案が表示されます）
   </div>
+
+  <script>
+    // send.htmlで表示された結果をlocalStorageから読み込んで表示
+    const saved = localStorage.getItem('goryon_lastResult');
+    if (saved) {
+      document.getElementById('responseBox').innerHTML = saved;
+    } else {
+      document.getElementById('responseBox').innerText = 'まだ提案はありません。';
+    }
+  </script>
 </body>
 </html>
