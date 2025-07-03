@@ -1,4 +1,4 @@
-// api/chat.js 
+// api/chat.js  
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 
@@ -25,9 +25,11 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid input' });
   }
 
+  // ✅ スキーマ名を明記
   const { data: menuItems, error: sbError } = await supabase
-    .from('menu_items')
+    .from('recommendation.menu_items')
     .select('name,description,pairing');
+
   if (sbError) {
     console.error('Supabase error:', sbError);
     return res.status(500).json({ error: 'Database fetch error' });
@@ -56,13 +58,14 @@ ${menuItems.map(i => `・${i.name}：${i.description}`).join('\n')}
       ],
       temperature: 0.3,
       max_tokens: 300,
-      response_format: "json" // ✅ JSON形式を強制
+      response_format: "json"
     });
 
     const reply = chat.choices[0].message.function_call?.arguments || chat.choices[0].message.content;
     const parsed = typeof reply === 'string' ? JSON.parse(reply) : reply;
 
-    await supabase.from('chat_logs').insert([{
+    // ✅ スキーマ名を明記
+    await supabase.from('recommendation.chat_logs').insert([{
       facility_name: facility,
       companion,
       preference,
