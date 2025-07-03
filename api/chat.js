@@ -9,13 +9,10 @@ const supabase = createClient(
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export default async function handler(req, res) {
-  // ✅ CORSヘッダー（すべてのリクエストに追加）
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  // ✅ OPTIONSリクエスト（プリフライト）の処理
   if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     return res.status(200).end();
   }
 
@@ -38,7 +35,7 @@ export default async function handler(req, res) {
 
   const prompt = `
 あなたは「${facility}」のAI接客スタッフです。
-以下内容をもとに、出力には純粋なJSONのみを返してください。マークダウンやコードフェンスは不要です。
+以下の情報をもとに、提案を考えてください。
 
 【同行者】${companion}
 【好み】${preference}
@@ -48,7 +45,8 @@ export default async function handler(req, res) {
 【メニュー一覧】
 ${menuItems.map(i => `・${i.name}：${i.description}`).join('\n')}
 
-{"recommend":"","story":"","pairing":""}
+以下のJSON形式のみで返答してください（装飾・マークダウン・改行なし）：
+{"recommend": "おすすめ料理", "story": "おすすめ理由", "pairing": "相性の良いペアリング"}
 `;
 
   try {
@@ -56,18 +54,27 @@ ${menuItems.map(i => `・${i.name}：${i.description}`).join('\n')}
       model: 'gpt-4o-mini',
       messages: [{ role: 'system', content: prompt }],
       temperature: 0.3,
-      max_tokens: 200
+      max_tokens: 300
     });
 
     let content = chat.choices[0].message.content.trim();
+
+    // JSONらしい部分だけを抽出（コードブロックなどを削除）
     content = content
-      .replace(/^```json\s*/, '')
+      .replace(/^```json\s*/i, '')
       .replace(/^```/, '')
       .replace(/```$/, '')
       .trim();
 
-    const reply = JSON.parse(content);
+    let reply;
+    try {
+      reply = JSON.parse(content);
+    } catch (err) {
+      console.error('JSON parse failed:', content);
+      return res.status(500).json({ error: 'Invalid JSON from OpenAI', raw: content });
+    }
 
+    // Supabase にログ保存
     await supabase.from('chat_logs').insert([{
       facility_name: facility,
       companion,
@@ -77,6 +84,7 @@ ${menuItems.map(i => `・${i.name}：${i.description}`).join('\n')}
       gpt_response: reply
     }]);
 
+    res.setHeader('Access-Control-Allow-Origin', '*');
     return res.status(200).json({ reply });
   } catch (err) {
     console.error('Handler error:', err);
