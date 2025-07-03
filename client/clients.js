@@ -1,4 +1,4 @@
-// clients.js
+// clients.js 
 async function sendMessage() {
   const btn    = document.getElementById('sendBtn');
   const resBox = document.getElementById('responseBox');
@@ -54,6 +54,10 @@ async function sendMessage() {
 <p>🍶 <strong>相性のペアリング</strong></p><br>
 <p>${reply.pairing}</p><br>
 `;
+
+    // ✅ display.html に表示させるための保存処理（追加）
+    localStorage.setItem('goryon_lastResult', resBox.innerHTML);
+
   } catch (e) {
     console.error(e);
     resBox.innerText = '❌ エラーが発生しました';
@@ -64,3 +68,4 @@ async function sendMessage() {
 }
 
 document.getElementById('sendBtn').addEventListener('click', sendMessage);
+
