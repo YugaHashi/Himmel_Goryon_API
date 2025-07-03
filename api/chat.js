@@ -34,9 +34,7 @@ export default async function handler(req, res) {
   }
 
   const prompt = `
-あなたは「${facility}」のAI接客スタッフです。
-以下の情報をもとに、提案を考えてください。
-
+以下の情報をもとに、お客様に最適な料理をおすすめしてください。
 【同行者】${companion}
 【好み】${preference}
 【気分】${mood}
@@ -52,42 +50,31 @@ ${menuItems.map(i => `・${i.name}：${i.description}`).join('\n')}
   try {
     const chat = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
-      messages: [{ role: 'system', content: prompt }],
+      messages: [
+        { role: 'system', content: `あなたは「${facility}」のAI接客スタッフです。` },
+        { role: 'user', content: prompt }
+      ],
       temperature: 0.3,
-      max_tokens: 300
+      max_tokens: 300,
+      response_format: "json" // ✅ JSON形式を強制
     });
 
-    let content = chat.choices[0].message.content.trim();
+    const reply = chat.choices[0].message.function_call?.arguments || chat.choices[0].message.content;
+    const parsed = typeof reply === 'string' ? JSON.parse(reply) : reply;
 
-    // JSONらしい部分だけを抽出（コードブロックなどを削除）
-    content = content
-      .replace(/^```json\s*/i, '')
-      .replace(/^```/, '')
-      .replace(/```$/, '')
-      .trim();
-
-    let reply;
-    try {
-      reply = JSON.parse(content);
-    } catch (err) {
-      console.error('JSON parse failed:', content);
-      return res.status(500).json({ error: 'Invalid JSON from OpenAI', raw: content });
-    }
-
-    // Supabase にログ保存
     await supabase.from('chat_logs').insert([{
       facility_name: facility,
       companion,
       preference,
       mood,
       freeInput,
-      gpt_response: reply
+      gpt_response: parsed
     }]);
 
     res.setHeader('Access-Control-Allow-Origin', '*');
-    return res.status(200).json({ reply });
+    return res.status(200).json({ reply: parsed });
   } catch (err) {
-    console.error('Handler error:', err);
-    return res.status(500).json({ error: 'Server error' });
+    console.error('Handler error:', err.message, err);
+    return res.status(500).json({ error: 'Server error', details: err.message });
   }
 }
