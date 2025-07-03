@@ -25,6 +25,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid input' });
   }
 
+  // 🟢 public スキーマへ変更
   const { data: menuItems, error: sbError } = await supabase
     .from('menu_items')
     .select('name,description,pairing');
@@ -49,6 +50,7 @@ ${menuItems.map(i => `・${i.name}：${i.description}`).join('\n')}
 `;
 
   try {
+    // 🔧 修正ポイント: response_format を削除（OpenAI Node SDKでは非対応）
     const chat = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -56,13 +58,13 @@ ${menuItems.map(i => `・${i.name}：${i.description}`).join('\n')}
         { role: 'user', content: prompt }
       ],
       temperature: 0.3,
-      max_tokens: 300,
-      response_format: "json"
+      max_tokens: 300
     });
 
-    const reply = chat.choices[0].message.function_call?.arguments || chat.choices[0].message.content;
+    const reply = chat.choices[0].message.content;
     const parsed = typeof reply === 'string' ? JSON.parse(reply) : reply;
 
+    // 🟢 public スキーマへ変更
     await supabase
       .from('chat_logs')
       .insert([{
