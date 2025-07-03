@@ -10,16 +10,14 @@
               border-left:5px solid #7b5b44;
               border-radius:10px;
               min-height:100px;white-space:pre-wrap;">
-    （ここに提案が表示されます）
+    まだ提案はありません。
   </div>
 
   <script>
-    // send.html 側で保存された提案を表示
-    const saved = localStorage.getItem('goryon_lastResult');
-    if (saved) {
-      document.getElementById('responseBox').innerHTML = saved;
-    } else {
-      document.getElementById('responseBox').innerText = 'まだ提案はありません。';
+    // ページ読み込み時は初期化後、直前の結果だけを表示
+    const last = localStorage.getItem('goryon_lastResult') || ''
+    if (last) {
+      document.getElementById('responseBox').innerHTML = last
     }
   </script>
 </body>
