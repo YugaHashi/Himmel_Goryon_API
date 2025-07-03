@@ -14,13 +14,9 @@
   </div>
 
   <script>
-    // send.html 側で保存された提案を表示
     const saved = localStorage.getItem('goryon_lastResult');
-    if (saved) {
-      document.getElementById('responseBox').innerHTML = saved;
-    } else {
-      document.getElementById('responseBox').innerText = 'まだ提案はありません。';
-    }
+    const box = document.getElementById('responseBox');
+    box.innerHTML = saved || 'まだ提案はありません。';
   </script>
 </body>
 </html>
