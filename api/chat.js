@@ -1,4 +1,4 @@
-// api/chat.js
+// api/chat.js 
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 
@@ -9,10 +9,13 @@ const supabase = createClient(
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export default async function handler(req, res) {
+  // ✅ CORSヘッダー（すべてのリクエストに追加）
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // ✅ OPTIONSリクエスト（プリフライト）の処理
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     return res.status(200).end();
   }
 
@@ -74,7 +77,6 @@ ${menuItems.map(i => `・${i.name}：${i.description}`).join('\n')}
       gpt_response: reply
     }]);
 
-    res.setHeader('Access-Control-Allow-Origin', '*');
     return res.status(200).json({ reply });
   } catch (err) {
     console.error('Handler error:', err);
