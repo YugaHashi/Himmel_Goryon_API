@@ -9,7 +9,7 @@
   "routes": [
     {
       "src": "/api/chat",
-      "methods": ["GET", "POST", "OPTIONS"],
+      "methods": ["POST", "OPTIONS"],
       "headers": {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET,OPTIONS,PATCH,DELETE,POST,PUT",
@@ -18,7 +18,7 @@
     },
     {
       "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "dest": "/api/$1.js"
     }
   ]
 }
