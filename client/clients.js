@@ -83,7 +83,6 @@
       } catch (err) {
         console.error(err);
         responseBox.textContent = '❌ エラーが発生しました';
-        responseBox.style.color = 'white';
       } finally {
         sendBtn.disabled = false;
         sendBtn.textContent = '▶ 提案を聞く';
