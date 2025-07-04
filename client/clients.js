@@ -1,23 +1,23 @@
-(function(){
-  const API_ENDPOINT = 'https://himmel-api.vercel.app/api/chat';  // ← 正しいVercel URL
+(function () {
+  const API_ENDPOINT = 'https://himmel-goryon-api.vercel.app/api/chat'; // ← 修正済みURL
 
   document.addEventListener('DOMContentLoaded', () => {
-    const msgEl       = document.getElementById('message');
-    const usageEl     = document.getElementById('usageNotice');
-    const sendBtn     = document.getElementById('sendBtn');
+    const msgEl = document.getElementById('message');
+    const usageEl = document.getElementById('usageNotice');
+    const sendBtn = document.getElementById('sendBtn');
     const responseBox = document.getElementById('responseBox');
 
-    const today    = new Date().toISOString().slice(0,10);
-    const urlDate  = new URLSearchParams(window.location.search).get('date');
+    const today = new Date().toISOString().slice(0, 10);
+    const urlDate = new URLSearchParams(window.location.search).get('date');
     const usageKey = `usage_${today}`;
-    let count      = parseInt(localStorage.getItem(usageKey) || '0', 10);
+    let count = parseInt(localStorage.getItem(usageKey) || '0', 10);
 
     if (msgEl && usageEl) {
       if (!urlDate || urlDate !== today) {
         msgEl.textContent = 'このURLの有効期限は切れています。QRコードを再読み込みしてください。';
         if (sendBtn) sendBtn.disabled = true;
       } else {
-        usageEl.textContent = `利用回数：残り${Math.max(0,3 - count)}回`;
+        usageEl.textContent = `利用回数：残り${Math.max(0, 3 - count)}回`;
       }
     }
 
@@ -28,17 +28,17 @@
         return;
       }
 
-      const companion  = document.getElementById('companion')?.value;
+      const companion = document.getElementById('companion')?.value;
       const preference = document.getElementById('preference')?.value;
-      const mood       = document.getElementById('mood')?.value;
-      const freeInput  = document.getElementById('freeInput')?.value.trim() || '';
+      const mood = document.getElementById('mood')?.value;
+      const freeInput = document.getElementById('freeInput')?.value.trim() || '';
 
       if (!companion || !preference || !mood) {
         responseBox.textContent = '⚠️ 全て選択してください';
         return;
       }
 
-      sendBtn.disabled    = true;
+      sendBtn.disabled = true;
       sendBtn.textContent = '🍶 考え中…';
       responseBox.textContent = '🍶 ご提案を考え中です…';
 
@@ -51,8 +51,8 @@
             preference,
             mood,
             freeInput,
-            facility: '南平台ごりょんさん'
-          })
+            facility: '南平台ごりょんさん',
+          }),
         });
 
         if (!res.ok) throw new Error(res.statusText);
@@ -60,7 +60,7 @@
 
         count++;
         localStorage.setItem(usageKey, count);
-        if (usageEl) usageEl.textContent = `利用回数：残り${Math.max(0,3 - count)}回`;
+        if (usageEl) usageEl.textContent = `利用回数：残り${Math.max(0, 3 - count)}回`;
 
         responseBox.innerHTML = `
           <p>🍽 <strong>おすすめメニュー</strong></p>
@@ -74,7 +74,7 @@
         console.error(err);
         responseBox.textContent = '❌ エラーが発生しました';
       } finally {
-        sendBtn.disabled    = false;
+        sendBtn.disabled = false;
         sendBtn.textContent = '▶ 提案を聞く';
       }
     });
