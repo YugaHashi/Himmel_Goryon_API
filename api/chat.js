@@ -50,7 +50,7 @@ async function handler(req, res) {
 【補足】${freeInput || 'なし'}
 
 【メニュー一覧】
-${menuItems.map(i => ・${i.name}：${i.description}).join('\n')}
+${menuItems.map(i => `・${i.name}：${i.description}`).join('\n')}
 
 以下のJSON形式で返答してください：
 {"recommend": "おすすめ料理", "story": "おすすめ理由", "pairing": "相性の良いペアリング"}`;
@@ -59,7 +59,7 @@ ${menuItems.map(i => ・${i.name}：${i.description}).join('\n')}
     const chat = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
-        { role: 'system', content: あなたは「${facility}」のAI接客スタッフです。 },
+        { role: 'system', content: `あなたは「${facility}」のAI接客スタッフです。` },
         { role: 'user', content: prompt }
       ],
       temperature: 0.3,
@@ -85,5 +85,4 @@ ${menuItems.map(i => ・${i.name}：${i.description}).join('\n')}
   }
 }
 
-// --- ✅ CORSラッパーで包んで export ---
 export default withCors(handler);
