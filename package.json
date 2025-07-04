@@ -1,13 +1,9 @@
 {
-  "name": "goryon-chat-api",
+  "name": "himmel-api",
   "version": "1.0.0",
-  "type": "module",
+  "main": "api/chat.js",
   "scripts": {
-    "dev": "vercel dev",
-    "start": "vercel dev"
+    "start": "node api/chat.js"
   },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.0.0",
-    "openai": "^4.0.0"
-  }
+  "dependencies": {}
 }
