@@ -16,7 +16,6 @@ function withCors(handler) {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
 
     if (req.method === 'OPTIONS') {
-      // プリフライトリクエストへの即時応答
       return res.status(200).end();
     }
 
@@ -88,3 +87,4 @@ ${menuItems.map(i => `・${i.name}：${i.description}`).join('\n')}
 
 // --- ✅ CORSラッパーで包んで export ---
 export default withCors(handler);
+
