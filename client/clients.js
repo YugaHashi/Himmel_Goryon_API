@@ -1,5 +1,5 @@
 (function () {
-  const API_ENDPOINT = 'https://himmel-goryon-api.vercel.app/api/chat'; // ← 修正済みURL
+  const API_ENDPOINT = 'https://himmel-goryon-api.vercel.app/api/chat';
 
   document.addEventListener('DOMContentLoaded', () => {
     const msgEl = document.getElementById('message');
@@ -15,16 +15,20 @@
     if (msgEl && usageEl) {
       if (!urlDate || urlDate !== today) {
         msgEl.textContent = 'このURLの有効期限は切れています。QRコードを再読み込みしてください。';
+        msgEl.style.color = 'white';
         if (sendBtn) sendBtn.disabled = true;
       } else {
         usageEl.textContent = `利用回数：残り${Math.max(0, 3 - count)}回`;
+        usageEl.style.color = 'white';
       }
     }
 
     if (!sendBtn) return;
+
     sendBtn.addEventListener('click', async () => {
       if (count >= 3) {
         responseBox.textContent = '⚠️ 本日の提案は上限の3回に達しました';
+        responseBox.style.color = 'white';
         return;
       }
 
@@ -35,12 +39,14 @@
 
       if (!companion || !preference || !mood) {
         responseBox.textContent = '⚠️ 全て選択してください';
+        responseBox.style.color = 'white';
         return;
       }
 
       sendBtn.disabled = true;
       sendBtn.textContent = '🍶 考え中…';
       responseBox.textContent = '🍶 ご提案を考え中です…';
+      responseBox.style.color = 'white';
 
       try {
         const res = await fetch(API_ENDPOINT, {
@@ -60,7 +66,10 @@
 
         count++;
         localStorage.setItem(usageKey, count);
-        if (usageEl) usageEl.textContent = `利用回数：残り${Math.max(0, 3 - count)}回`;
+        if (usageEl) {
+          usageEl.textContent = `利用回数：残り${Math.max(0, 3 - count)}回`;
+          usageEl.style.color = 'white';
+        }
 
         responseBox.innerHTML = `
           <p>🍽 <strong>おすすめメニュー</strong></p>
@@ -70,9 +79,11 @@
           <p>🍶 <strong>相性のペアリング</strong></p>
           <p>${pairing}</p>
         `;
+        responseBox.style.color = 'white';
       } catch (err) {
         console.error(err);
         responseBox.textContent = '❌ エラーが発生しました';
+        responseBox.style.color = 'white';
       } finally {
         sendBtn.disabled = false;
         sendBtn.textContent = '▶ 提案を聞く';
