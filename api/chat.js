@@ -1,71 +1,83 @@
-// api/chat.js
-import { createClient } from '@supabase/supabase-js';
-import OpenAI from 'openai';
+(function () {
+  const API_ENDPOINT = 'https://himmel-goryon-api.vercel.app/api/chat';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  document.addEventListener('DOMContentLoaded', () => {
+    const msgEl       = document.getElementById('message');
+    const usageEl     = document.getElementById('usageNotice');
+    const sendBtn     = document.getElementById('sendBtn');
+    const responseBox = document.getElementById('responseBox');
 
-export default async function handler(req, res) {
-  if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    return res.status(200).end();
-  }
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+    const today    = new Date().toISOString().slice(0, 10);
+    const urlDate  = new URLSearchParams(window.location.search).get('date');
+    const usageKey = `usage_${today}`;
+    let count      = parseInt(localStorage.getItem(usageKey) || '0', 10);
 
-  const { companion, preference, mood, freeInput, facility } = req.body;
-  if (!companion || !preference || !mood || !facility) {
-    return res.status(400).json({ error: 'Invalid input' });
-  }
+    if (msgEl && usageEl) {
+      if (!urlDate || urlDate !== today) {
+        msgEl.textContent = 'このURLの有効期限は切れています。QRコードを再読み込みしてください。';
+        if (sendBtn) sendBtn.disabled = true;
+      } else {
+        usageEl.textContent = `利用回数：残り${Math.max(0, 3 - count)}回`;
+      }
+    }
 
-  const { data: menuItems, error: sbError } = await supabase
-    .from('menu_items')
-    .select('name,description,pairing');
+    if (!sendBtn) return;
 
-  if (sbError) {
-    return res.status(500).json({ error: 'Database fetch error' });
-  }
+    sendBtn.addEventListener('click', async () => {
+      if (count >= 3) {
+        responseBox.textContent = '⚠️ 本日の提案は上限の3回に達しました';
+        return;
+      }
 
-  const prompt = `以下の情報をもとに、お客様に最適な料理をおすすめしてください。
-【同行者】${companion}
-【好み】${preference}
-【気分】${mood}
-【補足】${freeInput || 'なし'}
+      const companion  = document.getElementById('companion')?.value;
+      const preference = document.getElementById('preference')?.value;
+      const mood       = document.getElementById('mood')?.value;
+      const freeInput  = document.getElementById('freeInput')?.value.trim() || '';
 
-【メニュー一覧】
-${menuItems.map(i => `・${i.name}：${i.description}`).join('\n')}
+      if (!companion || !preference || !mood) {
+        responseBox.textContent = '⚠️ 全て選択してください';
+        return;
+      }
 
-以下のJSON形式で返答してください：
-{"recommend": "おすすめ料理", "story": "おすすめ理由", "pairing": "相性の良いペアリング"}`;
+      sendBtn.disabled    = true;
+      sendBtn.textContent = '🍶 考え中…';
+      responseBox.textContent = '🍶 ご提案を考え中です…';
 
-  try {
-    const chat = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: `あなたは「${facility}」のAI接客スタッフです。` },
-        { role: 'user', content: prompt }
-      ],
-      temperature: 0.3,
-      max_tokens: 300
+      try {
+        const res = await fetch(API_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            companion,
+            preference,
+            mood,
+            freeInput,
+            facility: '南平台ごりょんさん'
+          })
+        });
+
+        if (!res.ok) throw new Error(res.statusText);
+        const { recommend, story, pairing } = await res.json();
+
+        count++;
+        localStorage.setItem(usageKey, count);
+        if (usageEl) usageEl.textContent = `利用回数：残り${Math.max(0, 3 - count)}回`;
+
+        responseBox.innerHTML = `
+          <p>🍽 <strong>おすすめメニュー</strong></p>
+          <p>${recommend}</p>
+          <p>📝 <strong>おすすめ理由</strong></p>
+          <p>${story}</p>
+          <p>🍶 <strong>相性のペアリング</strong></p>
+          <p>${pairing}</p>
+        `;
+      } catch (err) {
+        console.error(err);
+        responseBox.textContent = '❌ エラーが発生しました';
+      } finally {
+        sendBtn.disabled    = false;
+        sendBtn.textContent = '▶ 提案を聞く';
+      }
     });
-
-    const reply = chat.choices[0].message.content;
-    const parsed = typeof reply === 'string' ? JSON.parse(reply) : reply;
-
-    await supabase
-      .from('chat_logs')
-      .insert([{ facility_name: facility, companion, preference, mood, freeInput, gpt_response: parsed }]);
-
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    return res.status(200).json(parsed);
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Server error', details: err.message });
-  }
-}
+  });
+})();
