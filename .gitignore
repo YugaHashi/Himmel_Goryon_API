@@ -1,7 +1,7 @@
-# APIキーなどを含む秘密ファイル
+# 環境変数
 .env
 .env.local
 
-# Node.js関連
+# ビルド成果物
 node_modules/
 dist/
