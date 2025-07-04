@@ -8,17 +8,17 @@ const supabase = createClient(
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export default async function handler(req, res) {
-  // 全てのリクエストにCORSヘッダーを付与
+  // ✅ すべてのリクエストにCORSヘッダーを無条件で付ける
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', '*'); // ← Content-Type だけでなく * にするのが確実
 
-  // CORSプリフライト用のOPTIONSリクエスト処理
+  // ✅ プリフライト（OPTIONS）対応
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
-  // POST以外を拒否
+  // ✅ POST以外を拒否
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -28,7 +28,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid input' });
   }
 
-  // メニュー一覧を取得
+  // ✅ Supabaseからメニュー一覧取得
   const { data: menuItems, error: sbError } = await supabase
     .from('menu_items')
     .select('name,description,pairing');
@@ -37,7 +37,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Database fetch error' });
   }
 
-  // プロンプト作成
+  // ✅ GPT用プロンプト生成
   const prompt = `以下の情報をもとに、お客様に最適な料理をおすすめしてください。
 【同行者】${companion}
 【好み】${preference}
@@ -64,7 +64,7 @@ ${menuItems.map(i => `・${i.name}：${i.description}`).join('\n')}
     const reply = chat.choices[0].message.content;
     const parsed = typeof reply === 'string' ? JSON.parse(reply) : reply;
 
-    // ログ保存
+    // ✅ ログをSupabaseに保存
     await supabase
       .from('chat_logs')
       .insert([{
@@ -79,6 +79,12 @@ ${menuItems.map(i => `・${i.name}：${i.description}`).join('\n')}
     return res.status(200).json(parsed);
   } catch (err) {
     console.error(err);
+
+    // ✅ catchにもCORSヘッダーを明示（これが抜けるとCORSエラーになることがある）
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', '*');
+
     return res.status(500).json({ error: 'Server error', details: err.message });
   }
 }
