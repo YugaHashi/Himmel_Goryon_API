@@ -1,4 +1,4 @@
-(function () { 
+(function () {
   const API_ENDPOINT = 'https://himmel-goryon-api.vercel.app/api/chat';
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -9,7 +9,7 @@
 
     const today = new Date().toISOString().slice(0, 10);
     const urlDate = new URLSearchParams(window.location.search).get('date');
-    const usageKey = usage_${today};
+    const usageKey = `usage_${today}`;
     let count = parseInt(localStorage.getItem(usageKey) || '0', 10);
 
     if (msgEl && usageEl) {
@@ -18,7 +18,7 @@
         msgEl.style.color = 'white';
         if (sendBtn) sendBtn.disabled = true;
       } else {
-        usageEl.textContent = 利用回数：残り${Math.max(0, 3 - count)}回;
+        usageEl.textContent = `利用回数：残り${Math.max(0, 3 - count)}回`;
         usageEl.style.color = 'white';
       }
     }
@@ -28,7 +28,7 @@
     sendBtn.addEventListener('click', async () => {
       if (count >= 3) {
         responseBox.textContent = '⚠ 本日の提案は上限の3回に達しました';
-        responseBox.style.color = ''; // デフォルト（黒）
+        responseBox.style.color = '';
         return;
       }
 
@@ -39,14 +39,14 @@
 
       if (!companion || !preference || !mood) {
         responseBox.textContent = '⚠ 全て選択してください';
-        responseBox.style.color = ''; // デフォルト（黒）
+        responseBox.style.color = '';
         return;
       }
 
       sendBtn.disabled = true;
       sendBtn.textContent = '🍶 考え中…';
       responseBox.textContent = '🍶 ご提案を考え中です…';
-      responseBox.style.color = ''; // デフォルト（黒）
+      responseBox.style.color = '';
 
       try {
         const res = await fetch(API_ENDPOINT, {
@@ -67,7 +67,7 @@
         count++;
         localStorage.setItem(usageKey, count);
         if (usageEl) {
-          usageEl.textContent = 利用回数：残り${Math.max(0, 3 - count)}回;
+          usageEl.textContent = `利用回数：残り${Math.max(0, 3 - count)}回`;
           usageEl.style.color = 'white';
         }
 
@@ -79,11 +79,11 @@
           <p>🍶 <strong>相性のペアリング</strong></p>
           <p>${pairing}</p>
         `;
-        responseBox.style.color = ''; // デフォルト（黒）
+        responseBox.style.color = '';
       } catch (err) {
         console.error(err);
         responseBox.textContent = '❌ エラーが発生しました';
-        responseBox.style.color = ''; // デフォルト（黒）
+        responseBox.style.color = '';
       } finally {
         sendBtn.disabled = false;
         sendBtn.textContent = '▶ 提案を聞く';
