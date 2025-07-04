@@ -1,6 +1,5 @@
 (function(){
-  // ✅ Vercelの実エンドポイントに修正済
-  const API_ENDPOINT = 'https://himmel-goryon-api.vercel.app/api/chat';
+  const API_ENDPOINT = 'https://himmel-api.vercel.app/api/chat';  // ← 正しいVercel URL
 
   document.addEventListener('DOMContentLoaded', () => {
     const msgEl       = document.getElementById('message');
