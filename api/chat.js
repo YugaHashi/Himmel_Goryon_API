@@ -1,4 +1,3 @@
-// api/chat.js
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 
@@ -9,11 +8,13 @@ const supabase = createClient(
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export default async function handler(req, res) {
-  // CORSプリフライト対応
+  // 全てのリクエストにCORSヘッダーを付与
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // CORSプリフライト用のOPTIONSリクエスト処理
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     return res.status(200).end();
   }
 
@@ -63,7 +64,7 @@ ${menuItems.map(i => `・${i.name}：${i.description}`).join('\n')}
     const reply = chat.choices[0].message.content;
     const parsed = typeof reply === 'string' ? JSON.parse(reply) : reply;
 
-    // ログをSupabaseに保存
+    // ログ保存
     await supabase
       .from('chat_logs')
       .insert([{
@@ -75,7 +76,6 @@ ${menuItems.map(i => `・${i.name}：${i.description}`).join('\n')}
         gpt_response: parsed
       }]);
 
-    res.setHeader('Access-Control-Allow-Origin', '*');
     return res.status(200).json(parsed);
   } catch (err) {
     console.error(err);
